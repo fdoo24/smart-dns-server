@@ -1,0 +1,37 @@
+services:
+  sniproxy:
+    image: ubuntu:24.04
+    container_name: smart-dns-sniproxy
+    restart: unless-stopped
+    ports:
+      - "${SERVER_IP:-0.0.0.0}:443:443/tcp"
+    command: /bin/sh -c "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y sniproxy && sniproxy -f -c /etc/my-sniproxy.conf"
+    volumes:
+      - ./configs/sniproxy.conf:/etc/my-sniproxy.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: smart-dns-adguard
+    restart: unless-stopped
+    ports:
+      - "${SERVER_IP:-0.0.0.0}:53:53/udp"
+      - "${SERVER_IP:-0.0.0.0}:53:53/tcp"
+      - "${SERVER_IP:-0.0.0.0}:853:853/tcp"
+      - "${SERVER_IP:-0.0.0.0}:853:853/udp"
+      - "${AG_WEB_PORT:-3000}:3000/tcp"
+    volumes:
+      - ./data/ag-work:/opt/adguardhome/work
+      - ./data/ag-conf:/opt/adguardhome/conf
+      - ./ssl:/opt/adguardhome/ssl:ro
+    depends_on:
+      - sniproxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

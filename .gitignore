@@ -1,0 +1,18 @@
+# Secret environment variables
+.env
+
+# SSL private keys and certificates
+ssl/
+*.pem
+*.key
+*.crt
+
+# AdGuard Home dynamic data and database
+data/
+ag-work/
+ag-conf/
+
+# Logs and temporary files
+*.log
+*.tmp
+.DS_Store
